@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Mail, Lock, User, CheckCircle, Award } from "lucide-react";
-import Swal from 'sweetalert2'; // <--- Importamos
+import { Mail, Lock, User, CheckCircle, Award, Eye, EyeOff } from "lucide-react"; // <--- Importamos
+import Swal from 'sweetalert2';
 
 export const Register = () => {
     const navigate = useNavigate();
@@ -9,6 +9,10 @@ export const Register = () => {
     const [datos, setDatos] = useState({
         nombre: "", email: "", password: "", confirmPassword: "", matricula: ""
     });
+
+    // Estados para mostrar contraseñas
+    const [showPass, setShowPass] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
 
     const handleChange = (e) => {
         setDatos({ ...datos, [e.target.name]: e.target.value });
@@ -26,8 +30,6 @@ export const Register = () => {
         }
 
         try {
-            // console.log("Enviando registro...", datos); // <--- COMENTADO
-
             const API_URL = import.meta.env.VITE_API_URL || "https://psico-app-backend-q5fm.onrender.com";
             const response = await fetch(`${API_URL}/api/auth/register`, {
                 method: "POST",
@@ -59,7 +61,6 @@ export const Register = () => {
                 });
             }
         } catch {
-            // console.error("Error de conexión:", error); // <--- COMENTADO
             Swal.fire({
                 icon: 'error',
                 title: 'Error de Conexión',
@@ -102,20 +103,42 @@ export const Register = () => {
                                 <input type="email" name="email" required placeholder="ejemplo@correo.com" className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" onChange={handleChange} />
                             </div>
                         </div>
+
                         {/* PASSWORD */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><Lock size={20} className="text-gray-400" /></div>
-                                <input type="password" name="password" required placeholder="••••••••" className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" onChange={handleChange} />
+                                <input
+                                    type={showPass ? "text" : "password"}
+                                    name="password"
+                                    required
+                                    placeholder="••••••••"
+                                    className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                                    onChange={handleChange}
+                                />
+                                <button type="button" onClick={() => setShowPass(!showPass)} className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer">
+                                    {showPass ? <EyeOff size={20} /> : <Eye size={20} />}
+                                </button>
                             </div>
                         </div>
+
                         {/* CONFIRM PASSWORD */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar Contraseña</label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><CheckCircle size={20} className="text-gray-400" /></div>
-                                <input type="password" name="confirmPassword" required placeholder="••••••••" className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" onChange={handleChange} />
+                                <input
+                                    type={showConfirm ? "text" : "password"}
+                                    name="confirmPassword"
+                                    required
+                                    placeholder="••••••••"
+                                    className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                                    onChange={handleChange}
+                                />
+                                <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer">
+                                    {showConfirm ? <EyeOff size={20} /> : <Eye size={20} />}
+                                </button>
                             </div>
                         </div>
 
