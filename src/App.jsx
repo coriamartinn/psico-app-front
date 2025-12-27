@@ -8,28 +8,31 @@ import { DatosProvider } from "./components/context/DatosContext";
 import { Sidebar } from "./components/Sidebar";
 import { ListaPacientes } from "./components/listaPacientes";
 import { FormularioPaciente } from "./components/FormularioPaciente";
-import { Calendario } from "./components/Calendario"; // Si lo tienes
+import { Calendario } from "./components/Calendario";
 import { Graficos } from "./components/Graficos";
 import { GeneradorInforme } from "./components/GeneradorInforme";
 import { Login } from "./components/auth/Login";
 import { Register } from "./components/auth/Register";
 import { RecuperarPassword } from "./components/auth/RecuperarPassword";
 
+// 👇 IMPORTACIONES NUEVAS (Asegúrate que la ruta sea correcta, ej: ./components/vistas/...)
+import { Dashboard } from "./components/vistas/Dashboard";
+import { Herramientas } from "./components/vistas/Herramientas";
+
 // --- GUARDIA DE SEGURIDAD ---
 const ProtectedRoute = () => {
   const usuario = localStorage.getItem("usuario");
-  // Si hay usuario, deja pasar (Outlet), si no, manda al Login
   return usuario ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
-// --- LAYOUT CON SIDEBAR (Diseño Principal) ---
+// --- LAYOUT CON SIDEBAR ---
 const MainLayout = () => {
   return (
-    <div className="flex min-h-screen bg-gray-100 h-96 w-full">
+    <div className="flex min-h-screen bg-gray-100 w-full">
       {/* Sidebar Fijo */}
       <Sidebar />
 
-      {/* Contenido a la derecha (ml-64 deja el hueco del sidebar) */}
+      {/* Contenido a la derecha */}
       <main className="flex-1 ml-64 p-8 transition-all overflow-y-auto h-screen">
         <Outlet />
       </main>
@@ -38,11 +41,9 @@ const MainLayout = () => {
 };
 
 function App() {
-  // Estado para saber qué paciente eligió el usuario en la lista
   const [pacienteSeleccionado, setPacienteSeleccionado] = useState(null);
 
   return (
-    // 1. Envuelve todo en el Proveedor de Datos para los gráficos
     <DatosProvider>
       <Routes>
 
@@ -50,37 +51,39 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<Register />} />
         <Route path="/recuperar-password" element={<RecuperarPassword />} />
-        {/* Alias por si escriben 'register' en vez de 'registro' */}
         <Route path="/register" element={<Navigate to="/registro" />} />
-
 
         {/* --- RUTAS PROTEGIDAS --- */}
         <Route element={<ProtectedRoute />}>
 
-          {/* Si pasa el login, usa el diseño con Sidebar */}
           <Route element={<MainLayout />}>
 
-            {/* INICIO: Lista de Pacientes */}
-            {/* Le pasamos la función para "recordar" al paciente clickeado */}
+            {/* 1. EL NUEVO HOME: DASHBOARD */}
+            <Route path="/" element={<Dashboard />} />
+
+            {/* 2. LISTA DE PACIENTES (Ruta nueva) */}
             <Route
-              path="/"
+              path="/pacientes"
               element={<ListaPacientes setPacienteSeleccionado={setPacienteSeleccionado} />}
             />
 
-            {/* CREAR PACIENTE */}
+            {/* 3. HERRAMIENTAS TERAPÉUTICAS (Pizarra/Respiración) */}
+            <Route path="/herramientas" element={<Herramientas />} />
+
+            {/* CREAR Y EDITAR */}
             <Route path="/crear" element={<FormularioPaciente />} />
             <Route path="/editar/:id" element={<FormularioPaciente />} />
 
-            {/* INFORMES: Necesita saber quién es el paciente actual */}
+            {/* INFORMES */}
             <Route
               path="/informes"
               element={<GeneradorInforme pacienteActual={pacienteSeleccionado} />}
             />
 
-            {/* GRÁFICOS: Usan el Contexto Global (DatosProvider) */}
+            {/* GRÁFICOS */}
             <Route path="/graficos" element={<Graficos />} />
 
-            {/* CALENDARIO (Si lo tienes creado) */}
+            {/* CALENDARIO */}
             <Route path="/calendario" element={<Calendario />} />
 
           </Route>
