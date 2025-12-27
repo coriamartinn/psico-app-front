@@ -16,7 +16,7 @@ const styles = StyleSheet.create({
     header: {
         marginBottom: 20,
         textAlign: 'center',
-        borderBottom: 1,
+        borderBottomWidth: 1,
         borderBottomColor: '#ccc',
         paddingBottom: 10
     },
@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
         padding: 10,
         backgroundColor: '#f9fafb',
         borderRadius: 4,
-        border: 1,
+        borderWidth: 1,
         borderColor: '#e5e7eb'
     },
     row: {
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     },
     firmaLine: {
         width: 200,
-        borderTop: 1,
+        borderTopWidth: 1,
         borderColor: '#000',
         marginBottom: 5
     },
