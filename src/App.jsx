@@ -4,20 +4,24 @@ import { useState } from "react";
 // --- CONTEXTO (Memoria Global) ---
 import { DatosProvider } from "./components/context/DatosContext";
 
-// --- COMPONENTES ---
+// --- COMPONENTES PRINCIPALES ---
 import { Sidebar } from "./components/Sidebar";
 import { ListaPacientes } from "./components/listaPacientes";
 import { FormularioPaciente } from "./components/FormularioPaciente";
 import { Calendario } from "./components/Calendario";
 import { Graficos } from "./components/Graficos";
 import { GeneradorInforme } from "./components/GeneradorInforme";
+
+// --- AUTH ---
 import { Login } from "./components/auth/Login";
 import { Register } from "./components/auth/Register";
 import { RecuperarPassword } from "./components/auth/RecuperarPassword";
 
-// 👇 IMPORTACIONES NUEVAS (Asegúrate que la ruta sea correcta, ej: ./components/vistas/...)
+// --- VISTAS (Páginas nuevas) ---
 import { Dashboard } from "./components/vistas/Dashboard";
 import { Herramientas } from "./components/vistas/Herramientas";
+import { ListaInformes } from "./components/vistas/ListaInformes"; // 👈 NUEVO: Historial
+import { Perfil } from "./components/Perfil"; // 👈 NUEVO: Configuración de usuario
 
 // --- GUARDIA DE SEGURIDAD ---
 const ProtectedRoute = () => {
@@ -58,33 +62,33 @@ function App() {
 
           <Route element={<MainLayout />}>
 
-            {/* 1. EL NUEVO HOME: DASHBOARD */}
+            {/* 1. DASHBOARD (Inicio) */}
             <Route path="/" element={<Dashboard />} />
 
-            {/* 2. LISTA DE PACIENTES (Ruta nueva) */}
+            {/* 2. PACIENTES */}
             <Route
               path="/pacientes"
               element={<ListaPacientes setPacienteSeleccionado={setPacienteSeleccionado} />}
             />
-
-            {/* 3. HERRAMIENTAS TERAPÉUTICAS (Pizarra/Respiración) */}
-            <Route path="/herramientas" element={<Herramientas />} />
-
-            {/* CREAR Y EDITAR */}
             <Route path="/crear" element={<FormularioPaciente />} />
             <Route path="/editar/:id" element={<FormularioPaciente />} />
 
-            {/* INFORMES */}
+            {/* 3. INFORMES */}
+            {/* Generador (Redactor) */}
             <Route
               path="/informes"
               element={<GeneradorInforme pacienteActual={pacienteSeleccionado} />}
             />
+            {/* Historial y lista (Nueva pantalla) */}
+            <Route path="/lista-informes" element={<ListaInformes />} />
 
-            {/* GRÁFICOS */}
+            {/* 4. HERRAMIENTAS Y EXTRAS */}
+            <Route path="/herramientas" element={<Herramientas />} />
             <Route path="/graficos" element={<Graficos />} />
-
-            {/* CALENDARIO */}
             <Route path="/calendario" element={<Calendario />} />
+
+            {/* 5. PERFIL DE USUARIO (Nueva pantalla) */}
+            <Route path="/perfil" element={<Perfil />} />
 
           </Route>
 
