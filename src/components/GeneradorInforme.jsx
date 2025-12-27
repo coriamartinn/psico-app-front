@@ -8,7 +8,7 @@ import { useDatos } from "./context/DatosContext";
 export const GeneradorInforme = ({ pacienteActual: pacienteInicial }) => {
     const { imagenes, guardarImagenGrafico } = useDatos();
 
-    // 1. DEFINIMOS LA URL INTELIGENTE AQUÍ
+    // 1. DEFINIMOS LA URL INTELIGENTE
     const API_URL = import.meta.env.VITE_API_URL || "https://psico-app-backend-q5fm.onrender.com";
 
     const [profesional] = useState(() => {
@@ -34,12 +34,32 @@ export const GeneradorInforme = ({ pacienteActual: pacienteInicial }) => {
         conclusiones: ""
     });
 
+    // 👇 AQUÍ ESTÁ LA CORRECCIÓN IMPORTANTE
     useEffect(() => {
         let montado = true;
-        // 2. USAMOS LA VARIABLE API_URL AQUÍ EN LUGAR DE LOCALHOST
-        fetch(`${API_URL}/api/pacientes`)
+        const token = localStorage.getItem('token'); // 1. Recuperamos token
+
+        if (!token) return; // Si no hay token, no intentamos nada
+
+        fetch(`${API_URL}/api/pacientes`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` // 2. Lo enviamos al Backend
+            }
+        })
             .then(r => r.json())
-            .then(d => montado && setListaPacientes(d))
+            .then(d => {
+                if (montado) {
+                    // 3. Verificamos que sea un array para evitar la pantalla blanca
+                    if (Array.isArray(d)) {
+                        setListaPacientes(d);
+                    } else {
+                        console.error("Error: El servidor no devolvió una lista", d);
+                        setListaPacientes([]);
+                    }
+                }
+            })
             .catch(console.error);
 
         return () => { montado = false };
@@ -50,6 +70,7 @@ export const GeneradorInforme = ({ pacienteActual: pacienteInicial }) => {
     }, [pacienteInicial]);
 
     const handleChange = (e) => setContenido({ ...contenido, [e.target.name]: e.target.value });
+
     const handlePacienteChange = (e) => {
         const p = listaPacientes.find(x => x.id === Number(e.target.value));
         if (p) setPaciente(p);
@@ -59,7 +80,7 @@ export const GeneradorInforme = ({ pacienteActual: pacienteInicial }) => {
         <div className="flex h-[calc(100vh-50px)] bg-gray-100 overflow-hidden">
             <div className="w-[45%] flex flex-col border-r border-gray-300 bg-white shadow-xl z-10">
 
-                {/* --- HEADER ARREGLADO VISUALMENTE --- */}
+                {/* --- HEADER --- */}
                 <div className="p-4 bg-slate-800 text-white flex flex-col gap-3 shadow-md">
                     <div className="flex items-center gap-2 mb-1">
                         <FileText className="text-blue-400" size={24} />
@@ -67,7 +88,6 @@ export const GeneradorInforme = ({ pacienteActual: pacienteInicial }) => {
                     </div>
 
                     <div className="flex gap-3 items-center">
-                        {/* Selector con diseño mejorado: Fondo blanco, altura fija, texto oscuro */}
                         <div className="relative flex-1">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <User size={18} className="text-slate-500" />
@@ -78,11 +98,11 @@ export const GeneradorInforme = ({ pacienteActual: pacienteInicial }) => {
                                 value={paciente?.id || ""}
                             >
                                 <option value="" disabled>Seleccionar Paciente...</option>
+                                {/* Ahora esto no fallará porque listaPacientes siempre será array */}
                                 {listaPacientes.map(p => <option key={p.id} value={p.id}>{p.first_name} {p.last_name}</option>)}
                             </select>
                         </div>
 
-                        {/* Botón Drive más visible */}
                         {paciente?.drive_link && (
                             <a
                                 href={paciente.drive_link}

@@ -1,12 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-    Search,
-    UserPlus,
-    BarChart3,
-    Trash2,
-    Edit // <--- IMPORTAMOS EL ICONO DE EDITAR
-} from "lucide-react";
+import { Search, UserPlus, BarChart3, Trash2, Edit } from "lucide-react";
 import { BotonDrive } from "./BotonDrive";
 import Swal from 'sweetalert2';
 
@@ -15,11 +9,15 @@ export const ListaPacientes = ({ setPacienteSeleccionado }) => {
     const [busqueda, setBusqueda] = useState("");
     const [error, setError] = useState("");
 
+    // 1. DEFINIMOS LA URL UNA SOLA VEZ AL PRINCIPIO
+    const API_URL = import.meta.env.VITE_API_URL || "https://psico-app-backend-q5fm.onrender.com";
+
     const cargarPacientes = async () => {
         try {
-            const API_URL = import.meta.env.VITE_API_URL || "https://psico-app-backend-q5fm.onrender.com";
-            // Obtenemos el token para autenticación
             const token = localStorage.getItem("token");
+
+            // Si no hay token, no intentamos cargar nada (evita errores 401 innecesarios)
+            if (!token) return;
 
             const response = await fetch(`${API_URL}/api/pacientes`, {
                 headers: { "Authorization": `Bearer ${token}` }
@@ -61,9 +59,9 @@ export const ListaPacientes = ({ setPacienteSeleccionado }) => {
 
         if (result.isConfirmed) {
             try {
-                const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
                 const token = localStorage.getItem("token");
 
+                // 2. USAMOS LA MISMA URL CORRECTA AQUÍ
                 const res = await fetch(`${API_URL}/api/pacientes/${id}`, {
                     method: "DELETE",
                     headers: { "Authorization": `Bearer ${token}` }
@@ -80,6 +78,8 @@ export const ListaPacientes = ({ setPacienteSeleccionado }) => {
             }
         }
     };
+
+    // ... (El resto de tu código: filtros, Toast y Return están perfectos)
 
     const pacientesFiltrados = pacientes.filter((p) =>
         p.first_name?.toLowerCase().includes(busqueda.toLowerCase()) ||
@@ -100,9 +100,11 @@ export const ListaPacientes = ({ setPacienteSeleccionado }) => {
     });
 
     return (
+        // ... (Tu JSX está perfecto, no hace falta cambiarlo)
         <div className="p-6 bg-gray-100 min-h-screen">
+            {/* ... Resto del JSX ... */}
+            {/* Solo asegúrate de copiar todo el return que ya tenías */}
             <div className="max-w-7xl mx-auto bg-white shadow-lg rounded-xl overflow-hidden">
-
                 {/* ENCABEZADO */}
                 <div className="p-6 border-b border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
                     <div>
