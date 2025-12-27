@@ -25,7 +25,7 @@ const ProtectedRoute = () => {
 // --- LAYOUT CON SIDEBAR (Diseño Principal) ---
 const MainLayout = () => {
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex min-h-screen bg-gray-100 h-96 w-full">
       {/* Sidebar Fijo */}
       <Sidebar />
 

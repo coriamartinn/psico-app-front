@@ -118,7 +118,7 @@ export const Graficos = () => {
     const ChartLegend = () => (
         <div className="absolute top-28 right-10 bg-white border border-gray-300 p-3 rounded shadow-sm z-20 text-xs space-y-2">
             <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-blue-700 flex items-center justify-center"><div className="w-full h-[3px] bg-blue-700"></div></div><span className="text-gray-700 font-medium">Puntuación</span></div>
-            <div className="flex items-center gap-2"><div className="w-4 h-[3px] bg-red-500"></div><span className="text-gray-600">{isBrief ? "Clínico / +1 DE" : "Desviación Estándar"}</span></div>
+            <div className="flex items-center gap-2"><div className="w-4 h-[3px] bg-red-500"></div><span className="text-gray-600">{isBrief ? "Desviación Estándar" : ""}</span></div>
             <div className="flex items-center gap-2"><div className="w-4 h-[3px] bg-green-500"></div><span className="text-gray-600">Media</span></div>
         </div>
     );
