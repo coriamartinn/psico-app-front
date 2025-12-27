@@ -8,18 +8,22 @@ import { useDatos } from "./context/DatosContext";
 export const GeneradorInforme = ({ pacienteActual: pacienteInicial }) => {
     const { imagenes, guardarImagenGrafico } = useDatos();
 
-    // 1. DEFINIMOS LA URL INTELIGENTE
+    // URL Inteligente
     const API_URL = import.meta.env.VITE_API_URL || "https://psico-app-backend-q5fm.onrender.com";
 
+    // Estado del profesional (recuperado del localStorage)
     const [profesional] = useState(() => {
         try {
             const u = localStorage.getItem("usuario");
             if (u) {
                 const user = JSON.parse(u);
-                return { nombre: user.first_name ? `${user.first_name} ${user.last_name}` : user.nombre, matricula: user.matricula || "M.P." };
+                return {
+                    nombre: user.first_name ? `${user.first_name} ${user.last_name}` : user.nombre,
+                    matricula: user.matricula || "M.P. (Sin especificar)"
+                };
             }
         } catch (e) {
-            console.error("Error al obtener el usuario del localStorage:", e);
+            console.error("Error al obtener usuario:", e);
         }
         return { nombre: "Profesional", matricula: "" };
     });
@@ -34,39 +38,41 @@ export const GeneradorInforme = ({ pacienteActual: pacienteInicial }) => {
         conclusiones: ""
     });
 
-    // 👇 AQUÍ ESTÁ LA CORRECCIÓN IMPORTANTE
+    // Carga de pacientes desde el Backend
     useEffect(() => {
         let montado = true;
-        const token = localStorage.getItem('token'); // 1. Recuperamos token
+        const token = localStorage.getItem('token');
 
-        if (!token) return; // Si no hay token, no intentamos nada
+        if (!token) return;
 
         fetch(`${API_URL}/api/pacientes`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}` // 2. Lo enviamos al Backend
+                'Authorization': `Bearer ${token}`
             }
         })
             .then(r => r.json())
             .then(d => {
                 if (montado) {
-                    // 3. Verificamos que sea un array para evitar la pantalla blanca
                     if (Array.isArray(d)) {
                         setListaPacientes(d);
                     } else {
-                        console.error("Error: El servidor no devolvió una lista", d);
+                        console.error("La API no devolvió un array:", d);
                         setListaPacientes([]);
                     }
                 }
             })
-            .catch(console.error);
+            .catch(err => console.error("Error fetching pacientes:", err));
 
         return () => { montado = false };
     }, []);
 
+    // Actualizar paciente si cambia la prop inicial
     useEffect(() => {
-        if (pacienteInicial) setPaciente(prev => (prev && prev.id === pacienteInicial.id) ? prev : pacienteInicial);
+        if (pacienteInicial) {
+            setPaciente(prev => (prev && prev.id === pacienteInicial.id) ? prev : pacienteInicial);
+        }
     }, [pacienteInicial]);
 
     const handleChange = (e) => setContenido({ ...contenido, [e.target.name]: e.target.value });
@@ -78,13 +84,14 @@ export const GeneradorInforme = ({ pacienteActual: pacienteInicial }) => {
 
     return (
         <div className="flex h-[calc(100vh-50px)] bg-gray-100 overflow-hidden">
-            <div className="w-[45%] flex flex-col border-r border-gray-300 bg-white shadow-xl z-10">
+            {/* --- PANEL IZQUIERDO: EDITOR --- */}
+            <div className="w-full md:w-[45%] flex flex-col border-r border-gray-300 bg-white shadow-xl z-10">
 
-                {/* --- HEADER --- */}
+                {/* Header del Editor */}
                 <div className="p-4 bg-slate-800 text-white flex flex-col gap-3 shadow-md">
                     <div className="flex items-center gap-2 mb-1">
                         <FileText className="text-blue-400" size={24} />
-                        <h2 className="font-bold text-xl tracking-wide">Informe</h2>
+                        <h2 className="font-bold text-xl tracking-wide">Redacción de Informe</h2>
                     </div>
 
                     <div className="flex gap-3 items-center">
@@ -93,13 +100,14 @@ export const GeneradorInforme = ({ pacienteActual: pacienteInicial }) => {
                                 <User size={18} className="text-slate-500" />
                             </div>
                             <select
-                                className="w-full h-10 pl-10 pr-4 rounded-lg bg-white text-slate-900 border-none focus:ring-2 focus:ring-blue-500 font-medium cursor-pointer appearance-none shadow-sm"
+                                className="w-full h-10 pl-10 pr-4 rounded-lg bg-white text-slate-900 border-none focus:ring-2 focus:ring-blue-500 font-medium cursor-pointer shadow-sm text-sm"
                                 onChange={handlePacienteChange}
                                 value={paciente?.id || ""}
                             >
                                 <option value="" disabled>Seleccionar Paciente...</option>
-                                {/* Ahora esto no fallará porque listaPacientes siempre será array */}
-                                {listaPacientes.map(p => <option key={p.id} value={p.id}>{p.first_name} {p.last_name}</option>)}
+                                {listaPacientes.map(p => (
+                                    <option key={p.id} value={p.id}>{p.first_name} {p.last_name}</option>
+                                ))}
                             </select>
                         </div>
 
@@ -108,7 +116,7 @@ export const GeneradorInforme = ({ pacienteActual: pacienteInicial }) => {
                                 href={paciente.drive_link}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="h-10 px-4 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-2 font-bold shadow-md transition transform hover:scale-105"
+                                className="h-10 px-4 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-2 font-bold shadow-md transition hover:scale-105"
                                 title="Abrir carpeta de Drive"
                             >
                                 <FolderOpen size={20} />
@@ -122,36 +130,44 @@ export const GeneradorInforme = ({ pacienteActual: pacienteInicial }) => {
                     </div>
                 </div>
 
-                {/* --- RESTO DEL FORMULARIO --- */}
+                {/* Formulario */}
                 {paciente ? (
                     <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50">
                         <div>
                             <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Motivo de Consulta</label>
-                            <textarea name="motivo" className="w-full h-20 p-3 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm resize-none shadow-sm" value={contenido.motivo} onChange={handleChange} />
+                            <textarea name="motivo" className="w-full h-24 p-3 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm resize-none shadow-sm" value={contenido.motivo} onChange={handleChange} />
                         </div>
                         <div>
                             <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Pruebas Administradas</label>
-                            <textarea name="tecnicas" className="w-full h-20 p-3 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm resize-none shadow-sm" value={contenido.tecnicas} onChange={handleChange} />
+                            <textarea name="tecnicas" className="w-full h-24 p-3 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm resize-none shadow-sm" value={contenido.tecnicas} onChange={handleChange} />
                         </div>
 
                         <div>
                             <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Funcionamiento Cognitivo</label>
                             <textarea name="cognitivo" className="w-full h-32 p-3 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm resize-none shadow-sm" value={contenido.cognitivo} onChange={handleChange} />
+
+                            {/* Control de Gráfico WISC */}
                             {imagenes.wisc ? (
                                 <div className="mt-2 flex justify-between items-center bg-blue-50 p-2 rounded border border-blue-200 shadow-sm">
                                     <span className="flex gap-2 text-blue-800 text-xs font-bold items-center"><ImageIcon size={16} /> Gráfico WISC adjuntado</span>
-                                    <button onClick={() => guardarImagenGrafico('wisc', null)} className="text-red-400 hover:text-red-600 p-1"><Trash2 size={16} /></button>
+                                    <button onClick={() => guardarImagenGrafico('wisc', null)} className="text-red-400 hover:text-red-600 p-1 rounded hover:bg-red-50 transition"><Trash2 size={16} /></button>
                                 </div>
-                            ) : <div className="mt-1 text-xs text-gray-400 italic flex items-center gap-1">ℹ️ Gráfico WISC no adjuntado</div>}
+                            ) : (
+                                <div className="mt-1 text-xs text-gray-400 italic flex items-center gap-1 pl-1">
+                                    <span className="w-2 h-2 rounded-full bg-gray-300"></span> Gráfico WISC no adjuntado
+                                </div>
+                            )}
                         </div>
 
                         <div>
                             <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Conocimientos Lectoescritos</label>
                             <textarea name="lectoescritura" className="w-full h-32 p-3 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm resize-none shadow-sm" value={contenido.lectoescritura} onChange={handleChange} />
+
+                            {/* Control de Gráfico PROLEXIA */}
                             {imagenes.prolexia && (
                                 <div className="mt-2 flex justify-between items-center bg-green-50 p-2 rounded border border-green-200 shadow-sm">
                                     <span className="flex gap-2 text-green-800 text-xs font-bold items-center"><ImageIcon size={16} /> Gráfico PROLEXIA adjuntado</span>
-                                    <button onClick={() => guardarImagenGrafico('prolexia', null)} className="text-red-400 hover:text-red-600 p-1"><Trash2 size={16} /></button>
+                                    <button onClick={() => guardarImagenGrafico('prolexia', null)} className="text-red-400 hover:text-red-600 p-1 rounded hover:bg-red-50 transition"><Trash2 size={16} /></button>
                                 </div>
                             )}
                         </div>
@@ -161,27 +177,48 @@ export const GeneradorInforme = ({ pacienteActual: pacienteInicial }) => {
                             <textarea name="conclusiones" className="w-full h-32 p-3 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm resize-none shadow-sm" value={contenido.conclusiones} onChange={handleChange} />
                         </div>
                     </div>
-                ) : <div className="flex-1 p-10 flex flex-col items-center justify-center text-slate-400"><User size={48} className="mb-4 opacity-30" /><p>Selecciona un paciente para comenzar.</p></div>}
+                ) : (
+                    <div className="flex-1 p-10 flex flex-col items-center justify-center text-slate-400">
+                        <User size={64} className="mb-4 opacity-20" />
+                        <p className="font-medium">Selecciona un paciente para comenzar a redactar.</p>
+                    </div>
+                )}
 
+                {/* Footer con Botón de Descarga */}
                 {paciente && (
-                    <div className="p-4 bg-white border-t border-gray-200">
+                    <div className="p-4 bg-white border-t border-gray-200 z-20">
                         <PDFDownloadLink
                             document={<DocumentoPDF paciente={paciente} contenido={contenido} profesional={profesional} imagenes={imagenes} />}
-                            fileName={`Informe_${paciente.last_name}.pdf`}
+                            fileName={`Informe_${paciente.last_name}_${new Date().toLocaleDateString().replace(/\//g, '-')}.pdf`}
                         >
-                            {({ loading }) => <button disabled={loading} className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-lg flex justify-center items-center gap-2 transition transform active:scale-95">{loading ? <RefreshCw className="animate-spin" size={20} /> : <Download size={20} />} {loading ? "Generando..." : "Descargar Informe PDF"}</button>}
+                            {({ loading }) => (
+                                <button disabled={loading} className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-lg flex justify-center items-center gap-2 transition transform active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed">
+                                    {loading ? <RefreshCw className="animate-spin" size={20} /> : <Download size={20} />}
+                                    {loading ? "Generando PDF..." : "Descargar Informe PDF"}
+                                </button>
+                            )}
                         </PDFDownloadLink>
                     </div>
                 )}
             </div>
 
-            <div className="flex-1 bg-slate-600 h-full flex flex-col">
-                <div className="bg-slate-900 text-gray-300 text-xs py-2 px-4 font-bold uppercase tracking-wider text-center shadow-md">Vista Previa en Tiempo Real</div>
+            {/* --- PANEL DERECHO: VISTA PREVIA --- */}
+            <div className="hidden md:flex flex-1 bg-slate-700 h-full flex-col">
+                <div className="bg-slate-900 text-gray-300 text-xs py-2 px-4 font-bold uppercase tracking-wider text-center shadow-md">
+                    Vista Previa en Tiempo Real
+                </div>
                 {paciente ? (
-                    <div className="flex-1 p-4 overflow-hidden">
-                        <PDFViewer className="w-full h-full rounded-lg shadow-2xl border-none"><DocumentoPDF paciente={paciente} contenido={contenido} profesional={profesional} imagenes={imagenes} /></PDFViewer>
+                    <div className="flex-1 p-8 overflow-hidden flex items-center justify-center bg-slate-600">
+                        <PDFViewer className="w-full h-full rounded-md shadow-2xl border border-slate-500" showToolbar={true}>
+                            <DocumentoPDF paciente={paciente} contenido={contenido} profesional={profesional} imagenes={imagenes} />
+                        </PDFViewer>
                     </div>
-                ) : <div className="flex-1 flex items-center justify-center text-gray-400 flex-col"><FileText size={64} className="opacity-20 mb-4" /><p>El documento aparecerá aquí.</p></div>}
+                ) : (
+                    <div className="flex-1 flex items-center justify-center text-gray-400 flex-col opacity-50">
+                        <FileText size={80} className="mb-4" />
+                        <p>El documento aparecerá aquí cuando selecciones un paciente.</p>
+                    </div>
+                )}
             </div>
         </div>
     );
