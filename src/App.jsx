@@ -13,6 +13,7 @@ import { Graficos } from "./components/Graficos";
 import { GeneradorInforme } from "./components/GeneradorInforme";
 import { Login } from "./components/auth/Login";
 import { Register } from "./components/auth/Register";
+import { RecuperarPassword } from "./components/auth/RecuperarPassword";
 
 // --- GUARDIA DE SEGURIDAD ---
 const ProtectedRoute = () => {
@@ -48,6 +49,7 @@ function App() {
         {/* --- RUTAS PÚBLICAS --- */}
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<Register />} />
+        <Route path="/recuperar-password" element={<RecuperarPassword />} />
         {/* Alias por si escriben 'register' en vez de 'registro' */}
         <Route path="/register" element={<Navigate to="/registro" />} />
 
