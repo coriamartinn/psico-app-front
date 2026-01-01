@@ -20,8 +20,11 @@ import { RecuperarPassword } from "./components/auth/RecuperarPassword";
 // --- VISTAS (Páginas nuevas) ---
 import { Dashboard } from "./components/vistas/Dashboard";
 import { Herramientas } from "./components/vistas/Herramientas";
-import { ListaInformes } from "./components/vistas/ListaInformes"; // 👈 NUEVO: Historial
-import { Perfil } from "./components/Perfil"; // 👈 NUEVO: Configuración de usuario
+import { ListaInformes } from "./components/vistas/ListaInformes";
+import { Perfil } from "./components/Perfil";
+
+// --- NUEVOS COMPONENTES GLOBALES ---
+import DevBanner from "./components/DevBanner"; // 👈 1. Importamos el cartel amarillo
 
 // --- GUARDIA DE SEGURIDAD ---
 const ProtectedRoute = () => {
@@ -49,55 +52,60 @@ function App() {
 
   return (
     <DatosProvider>
-      <Routes>
 
-        {/* --- RUTAS PÚBLICAS --- */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/registro" element={<Register />} />
-        <Route path="/recuperar-password" element={<RecuperarPassword />} />
-        <Route path="/register" element={<Navigate to="/registro" />} />
+      {/* 👈 2. Ponemos el Banner acá para que se vea SIEMPRE, en todas las pantallas */}
+      <DevBanner />
 
-        {/* --- RUTAS PROTEGIDAS --- */}
-        <Route element={<ProtectedRoute />}>
+      {/* 👈 3. Agregamos este div con pt-10 (padding top) para que el banner no tape el contenido */}
+      <div className="pt-10 h-screen w-full">
+        <Routes>
 
-          <Route element={<MainLayout />}>
+          {/* --- RUTAS PÚBLICAS --- */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/registro" element={<Register />} />
+          <Route path="/recuperar-password" element={<RecuperarPassword />} />
+          <Route path="/register" element={<Navigate to="/registro" />} />
 
-            {/* 1. DASHBOARD (Inicio) */}
-            <Route path="/" element={<Dashboard />} />
+          {/* --- RUTAS PROTEGIDAS --- */}
+          <Route element={<ProtectedRoute />}>
 
-            {/* 2. PACIENTES */}
-            <Route
-              path="/pacientes"
-              element={<ListaPacientes setPacienteSeleccionado={setPacienteSeleccionado} />}
-            />
-            <Route path="/crear" element={<FormularioPaciente />} />
-            <Route path="/editar/:id" element={<FormularioPaciente />} />
+            <Route element={<MainLayout />}>
 
-            {/* 3. INFORMES */}
-            {/* Generador (Redactor) */}
-            <Route
-              path="/informes"
-              element={<GeneradorInforme pacienteActual={pacienteSeleccionado} />}
-            />
-            {/* Historial y lista (Nueva pantalla) */}
-            <Route path="/lista-informes" element={<ListaInformes />} />
+              {/* 1. DASHBOARD (Inicio) */}
+              <Route path="/" element={<Dashboard />} />
 
-            {/* 4. HERRAMIENTAS Y EXTRAS */}
-            <Route path="/herramientas" element={<Herramientas />} />
-            <Route path="/graficos" element={<Graficos />} />
-            <Route path="/calendario" element={<Calendario />} />
+              {/* 2. PACIENTES */}
+              <Route
+                path="/pacientes"
+                element={<ListaPacientes setPacienteSeleccionado={setPacienteSeleccionado} />}
+              />
+              <Route path="/crear" element={<FormularioPaciente />} />
+              <Route path="/editar/:id" element={<FormularioPaciente />} />
 
-            {/* 5. PERFIL DE USUARIO (Nueva pantalla) */}
-            <Route path="/perfil" element={<Perfil />} />
+              {/* 3. INFORMES */}
+              <Route
+                path="/informes"
+                element={<GeneradorInforme pacienteActual={pacienteSeleccionado} />}
+              />
+              <Route path="/lista-informes" element={<ListaInformes />} />
+
+              {/* 4. HERRAMIENTAS Y EXTRAS */}
+              <Route path="/herramientas" element={<Herramientas />} />
+              <Route path="/graficos" element={<Graficos />} />
+              <Route path="/calendario" element={<Calendario />} />
+
+              {/* 5. PERFIL DE USUARIO */}
+              <Route path="/perfil" element={<Perfil />} />
+
+            </Route>
 
           </Route>
 
-        </Route>
+          {/* CUALQUIER OTRA RUTA -> AL LOGIN */}
+          <Route path="*" element={<Navigate to="/login" />} />
 
-        {/* CUALQUIER OTRA RUTA -> AL LOGIN */}
-        <Route path="*" element={<Navigate to="/login" />} />
-
-      </Routes>
+        </Routes>
+      </div>
     </DatosProvider>
   );
 }
