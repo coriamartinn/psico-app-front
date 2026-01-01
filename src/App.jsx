@@ -51,8 +51,6 @@ function App() {
   return (
     <DatosProvider>
 
-      {/* 👈 2. Ponemos el Banner acá para que se vea SIEMPRE, en todas las pantallas */}
-      <DevBanner />
 
       {/* 👈 3. Agregamos este div con pt-10 (padding top) para que el banner no tape el contenido */}
       <div className="pt-10 h-screen w-full">
