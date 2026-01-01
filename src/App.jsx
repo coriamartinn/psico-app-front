@@ -23,8 +23,6 @@ import { Herramientas } from "./components/vistas/Herramientas";
 import { ListaInformes } from "./components/vistas/ListaInformes";
 import { Perfil } from "./components/Perfil";
 
-// --- NUEVOS COMPONENTES GLOBALES ---
-import DevBanner from "./components/DevBanner"; // 👈 1. Importamos el cartel amarillo
 
 // --- GUARDIA DE SEGURIDAD ---
 const ProtectedRoute = () => {
