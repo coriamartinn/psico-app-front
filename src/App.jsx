@@ -22,12 +22,26 @@ import { Dashboard } from "./components/vistas/Dashboard";
 import { Herramientas } from "./components/vistas/Herramientas";
 import { ListaInformes } from "./components/vistas/ListaInformes";
 import { Perfil } from "./components/Perfil";
+import { PantallaPago } from "./components/vistas/PantallaPago";
 
 
 // --- GUARDIA DE SEGURIDAD ---
 const ProtectedRoute = () => {
-  const usuario = localStorage.getItem("usuario");
-  return usuario ? <Outlet /> : <Navigate to="/login" replace />;
+  const usuarioStr = localStorage.getItem("usuario");
+
+  // 1. Si no hay usuario -> Al Login
+  if (!usuarioStr) return <Navigate to="/login" replace />;
+
+  const usuario = JSON.parse(usuarioStr);
+
+  // 2. Si está logueado pero NO PAGÓ (y no es admin, por ejemplo) -> Pantalla de Pago
+  // OJO: Asegúrate que en la BD el 0 sea número, si viene como string usa "0"
+  if (usuario.is_paid === 0) {
+    return <PantallaPago />;
+  }
+
+  // 3. Si pagó -> Deja pasar a las rutas hijas (Outlet)
+  return <Outlet />;
 };
 
 // --- LAYOUT CON SIDEBAR ---
