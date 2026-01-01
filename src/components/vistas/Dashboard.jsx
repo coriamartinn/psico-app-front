@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-    Users, School, Calendar, FileText,
+    Users, School, FileText,
     PlusCircle, Activity, Brain, Clock,
     FileSignature, ArrowRight
 } from "lucide-react";
@@ -50,7 +50,6 @@ export const Dashboard = () => {
         fetchStats();
     }, []);
 
-    // Función para obtener la fecha de hoy bonita
     const getFechaHoy = () => {
         const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         return new Date().toLocaleDateString('es-AR', opciones);
@@ -65,7 +64,7 @@ export const Dashboard = () => {
     return (
         <div className="p-6 md:p-10 bg-gray-50 min-h-screen font-sans">
 
-            {/* 1. HEADER DE BIENVENIDA */}
+            {/* HEADER */}
             <div className="mb-10 flex flex-col md:flex-row justify-between items-end md:items-center gap-4">
                 <div>
                     <p className="text-sm text-gray-500 font-medium uppercase tracking-wide mb-1">{getFechaHoy()}</p>
@@ -74,88 +73,65 @@ export const Dashboard = () => {
                     </h1>
                     <p className="text-slate-500 mt-2">Aquí tienes el resumen de tu consultorio hoy.</p>
                 </div>
-
-                {/* Botón de Acción Principal */}
                 <Link to="/crear" className="bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-slate-300/50 flex items-center gap-2 transition transform hover:-translate-y-1">
-                    <PlusCircle size={20} />
-                    Nuevo Paciente
+                    <PlusCircle size={20} /> Nuevo Paciente
                 </Link>
             </div>
 
-            {/* 2. TARJETAS DE MÉTRICAS (KPIs) */}
+            {/* TARJETAS KPI */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
 
+                {/* Pacientes Activos */}
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between hover:shadow-md transition">
                     <div className="flex justify-between items-start">
                         <div>
                             <p className="text-slate-400 text-xs font-bold uppercase">Pacientes Activos</p>
                             <h3 className="text-3xl font-extrabold text-slate-800 mt-1">{stats?.totalPacientes || 0}</h3>
                         </div>
-                        <div className="p-3 bg-purple-50 text-purple-600 rounded-xl">
-                            <Users size={24} />
-                        </div>
+                        <div className="p-3 bg-purple-50 text-purple-600 rounded-xl"><Users size={24} /></div>
                     </div>
-                    <div className="mt-4 text-xs text-green-600 font-bold bg-green-50 w-fit px-2 py-1 rounded">
-                        +2 este mes
-                    </div>
+                    <div className="mt-4 text-xs text-green-600 font-bold bg-green-50 w-fit px-2 py-1 rounded">+2 este mes</div>
                 </div>
 
+                {/* Instituciones */}
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between hover:shadow-md transition">
                     <div className="flex justify-between items-start">
                         <div>
                             <p className="text-slate-400 text-xs font-bold uppercase">Instituciones</p>
                             <h3 className="text-3xl font-extrabold text-slate-800 mt-1">{stats?.totalEscuelas || 0}</h3>
                         </div>
-                        <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
-                            <School size={24} />
-                        </div>
+                        <div className="p-3 bg-blue-50 text-blue-600 rounded-xl"><School size={24} /></div>
                     </div>
                     <p className="mt-4 text-xs text-slate-400">Escuelas vinculadas</p>
                 </div>
 
-                {/* --- TARJETA DE INFORMES (MODIFICADA) --- */}
+                {/* Informes (Dinámico) */}
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between hover:shadow-md transition">
                     <div className="flex justify-between items-start mb-2">
                         <div>
                             <p className="text-slate-400 text-xs font-bold uppercase">Informes Generados</p>
-                            {/* Ahora usa datos reales de la BD */}
                             <h3 className="text-3xl font-extrabold text-slate-800 mt-1">{stats?.totalInformes || 0}</h3>
                         </div>
-                        <div className="p-3 bg-orange-50 text-orange-600 rounded-xl">
-                            <FileText size={24} />
-                        </div>
+                        <div className="p-3 bg-orange-50 text-orange-600 rounded-xl"><FileText size={24} /></div>
                     </div>
-
-                    {/* Sección de Estado y Botones */}
                     <div>
                         <p className={`text-xs font-bold mb-3 ${(stats?.informesPendientes || 0) > 0 ? "text-orange-500" : "text-green-500"}`}>
                             {stats?.informesPendientes || 0} pendientes de firma
                         </p>
-
                         <div className="flex gap-2">
-                            {/* Botón Lista Informes */}
-                            <Link
-                                to="/lista-informes"
-                                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs py-2 px-2 rounded-lg font-bold text-center transition flex justify-center items-center gap-1"
-                            >
+                            <Link to="/lista-informes" className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs py-2 px-2 rounded-lg font-bold text-center transition flex justify-center items-center gap-1">
                                 Ver Historial
                             </Link>
-
-                            {/* Botón Firmar (Solo si hay pendientes) */}
                             {(stats?.informesPendientes || 0) > 0 && (
-                                <Link
-                                    to="/lista-informes?filter=pendientes"
-                                    className="flex-1 bg-orange-100 hover:bg-orange-200 text-orange-700 text-xs py-2 px-2 rounded-lg font-bold text-center transition flex justify-center items-center gap-1"
-                                >
-                                    <FileSignature size={14} />
-                                    Firmar
+                                <Link to="/lista-informes?filter=pendientes" className="flex-1 bg-orange-100 hover:bg-orange-200 text-orange-700 text-xs py-2 px-2 rounded-lg font-bold text-center transition flex justify-center items-center gap-1">
+                                    <FileSignature size={14} /> Firmar
                                 </Link>
                             )}
                         </div>
                     </div>
                 </div>
 
-                {/* Tarjeta de "Próximo Turno" */}
+                {/* Próximo Turno */}
                 <div className="bg-gradient-to-br from-purple-600 to-indigo-700 p-6 rounded-2xl shadow-lg shadow-purple-200 text-white flex flex-col justify-between relative overflow-hidden">
                     <div className="relative z-10">
                         <p className="text-purple-200 text-xs font-bold uppercase mb-1">Próxima Sesión</p>
@@ -171,33 +147,23 @@ export const Dashboard = () => {
                 </div>
             </div>
 
-            {/* 3. SECCIÓN GRÁFICOS Y ACCIONES */}
+            {/* SECCIÓN GRÁFICOS */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-                {/* GRÁFICO 1: DIAGNÓSTICOS (2 columnas de ancho) */}
+                {/* GRÁFICO COMBINADO (Solución al error width -1) */}
                 <div className="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                     <div className="flex justify-between items-center mb-6">
                         <h3 className="font-bold text-slate-700 flex items-center gap-2">
-                            <Brain size={20} className="text-purple-500" />
-                            Distribución Clínica
+                            <Brain size={20} className="text-purple-500" /> Distribución Clínica
                         </h3>
                     </div>
 
-                    <div className="flex flex-col md:flex-row h-72">
+                    <div className="flex flex-col md:flex-row gap-4">
                         {/* Torta */}
-                        <div className="flex-1 h-full">
+                        <div className="flex-1 h-64 w-full min-h-[250px]">
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
-                                    <Pie
-                                        data={stats?.distribucionDiagnosticos}
-                                        cx="50%"
-                                        cy="50%"
-                                        innerRadius={60}
-                                        outerRadius={80}
-                                        paddingAngle={5}
-                                        dataKey="cantidad"
-                                        nameKey="diagnosis"
-                                    >
+                                    <Pie data={stats?.distribucionDiagnosticos} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="cantidad" nameKey="diagnosis">
                                         {stats?.distribucionDiagnosticos?.map((entry, index) => (
                                             <Cell key={`cell-${index}`} fill={COLORS_PIE[index % COLORS_PIE.length]} />
                                         ))}
@@ -208,10 +174,10 @@ export const Dashboard = () => {
                             </ResponsiveContainer>
                         </div>
 
-                        {/* Barras (Escolaridad) */}
-                        <div className="flex-1 h-full border-l border-slate-100 pl-0 md:pl-6 mt-6 md:mt-0">
+                        {/* Barras */}
+                        <div className="flex-1 h-64 w-full min-h-[250px] border-l border-slate-100 pl-0 md:pl-6 pt-6 md:pt-0">
                             <h4 className="text-xs font-bold text-slate-400 uppercase mb-4 text-center">Nivel Escolar</h4>
-                            <ResponsiveContainer width="100%" height="85%">
+                            <ResponsiveContainer width="100%" height="100%">
                                 <BarChart data={stats?.distribucionEscolaridad}>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                     <XAxis dataKey="school_grade" tick={{ fontSize: 10 }} interval={0} />
@@ -224,14 +190,12 @@ export const Dashboard = () => {
                     </div>
                 </div>
 
-                {/* COLUMNA DERECHA: ACCIONES Y NOTIFICACIONES */}
+                {/* COLUMNA DERECHA */}
                 <div className="space-y-6">
-
-                    {/* Lista de Recientes */}
+                    {/* Recientes */}
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                         <h3 className="font-bold text-slate-700 mb-4 text-sm flex items-center gap-2">
-                            <Activity size={18} className="text-green-500" />
-                            Recientemente Agregados
+                            <Activity size={18} className="text-green-500" /> Recientemente Agregados
                         </h3>
                         <div className="space-y-4">
                             {stats?.pacientesRecientes?.length > 0 ? (
@@ -246,26 +210,18 @@ export const Dashboard = () => {
                                         </div>
                                     </div>
                                 ))
-                            ) : (
-                                <p className="text-xs text-slate-400">No hay pacientes recientes.</p>
-                            )}
+                            ) : <p className="text-xs text-slate-400">No hay pacientes recientes.</p>}
                         </div>
-                        <Link to="/pacientes" className="block text-center text-xs font-bold text-purple-600 mt-4 hover:underline">
-                            Ver todos los pacientes
-                        </Link>
+                        <Link to="/pacientes" className="block text-center text-xs font-bold text-purple-600 mt-4 hover:underline">Ver todos los pacientes</Link>
                     </div>
 
-                    {/* Caja de Herramientas Rápida */}
+                    {/* Herramientas */}
                     <div className="bg-teal-50 p-6 rounded-2xl border border-teal-100">
                         <h3 className="font-bold text-teal-800 mb-2">Herramientas</h3>
                         <p className="text-xs text-teal-600 mb-4">Acceso rápido a utilidades de sesión.</p>
                         <div className="grid grid-cols-2 gap-3">
-                            <Link to="/herramientas" className="bg-white py-2 px-3 rounded-lg text-xs font-bold text-teal-700 shadow-sm text-center hover:shadow-md transition">
-                                🎨 Pizarra
-                            </Link>
-                            <Link to="/herramientas" className="bg-white py-2 px-3 rounded-lg text-xs font-bold text-teal-700 shadow-sm text-center hover:shadow-md transition">
-                                🧘 Respiración
-                            </Link>
+                            <Link to="/herramientas" className="bg-white py-2 px-3 rounded-lg text-xs font-bold text-teal-700 shadow-sm text-center hover:shadow-md transition">🎨 Pizarra</Link>
+                            <Link to="/herramientas" className="bg-white py-2 px-3 rounded-lg text-xs font-bold text-teal-700 shadow-sm text-center hover:shadow-md transition">🧘 Respiración</Link>
                         </div>
                     </div>
                 </div>

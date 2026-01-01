@@ -108,6 +108,7 @@ export const Login = () => {
                                 <input
                                     type={mostrarPassword ? "text" : "password"}
                                     name="password"
+                                    autoComplete="current-password"
                                     required
                                     placeholder="••••••••"
                                     className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 transition"
