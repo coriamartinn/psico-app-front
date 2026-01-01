@@ -49,7 +49,7 @@ export const PantallaPago = () => {
                     </ul>
 
                     <div className="text-center mb-6">
-                        <span className="text-4xl font-bold text-slate-800">$15.000</span>
+                        <span className="text-4xl font-bold text-slate-800">$75.000</span>
                         <span className="text-slate-500 text-sm"> / pago único</span>
                     </div>
 
