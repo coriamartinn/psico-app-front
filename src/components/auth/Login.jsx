@@ -3,17 +3,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { Mail, Lock, LogIn, Eye, EyeOff } from "lucide-react";
 import Swal from 'sweetalert2';
 
-// 1. IMPORTAMOS EL MODAL DE PAGO (Ajustá la ruta si es necesario)
-import PaymentModal from "../PaymentModal";
-
 export const Login = () => {
     const navigate = useNavigate();
     const [datos, setDatos] = useState({ email: "", password: "" });
     const [mostrarPassword, setMostrarPassword] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
 
-    // 2. NUEVO ESTADO PARA CONTROLAR EL MODAL
-    const [showPaywall, setShowPaywall] = useState(false);
+    // 1. NUEVO ESTADO PARA LA CARGA
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleChange = (e) => {
         setDatos({ ...datos, [e.target.name]: e.target.value });
@@ -25,17 +21,6 @@ export const Login = () => {
         if (!datos.email || !datos.password) {
             return Swal.fire({ icon: 'warning', title: 'Campos vacíos', text: 'Por favor completa todos los campos' });
         }
-
-        // --- 3. LÓGICA DE PAGO (BLOQUEO) ---
-        // Aquí simulamos si el usuario tiene permiso.
-        // CAMBIÁ ESTO A 'true' CUANDO QUIERAS PODER ENTRAR REALMENTE.
-        const usuarioTienePlanActivo = false;
-
-        if (!usuarioTienePlanActivo) {
-            setShowPaywall(true); // Mostramos el cartel
-            return; // ⛔ DETENEMOS LA EJECUCIÓN AQUÍ. No se conecta a la API.
-        }
-        // -----------------------------------
 
         // ACTIVAMOS EL MODO CARGA
         setIsLoading(true);
@@ -57,7 +42,7 @@ export const Login = () => {
                 const nombreReal = usuarioReal.nombre || usuarioReal.first_name || data.nombre;
 
                 if (!tokenReal) {
-                    setIsLoading(false);
+                    setIsLoading(false); // Apagamos carga si hay error
                     return Swal.fire({ icon: 'error', title: 'Error de Sistema', text: 'El servidor no envió el token.' });
                 }
 
@@ -80,6 +65,7 @@ export const Login = () => {
             console.error("Error completo:", error);
             Swal.fire({ icon: 'error', title: 'Error de Conexión', text: 'El servidor está despertando, intenta de nuevo en 30 segundos.' });
         } finally {
+            // SIEMPRE APAGAMOS LA CARGA AL FINAL (Haya funcionado o no)
             setIsLoading(false);
         }
     };
@@ -110,6 +96,7 @@ export const Login = () => {
                         <div>
                             <div className="flex justify-between items-center mb-1">
                                 <label className="block text-sm font-medium text-gray-700">Contraseña</label>
+                                {/* 2. LINK DE OLVIDÉ MI CONTRASEÑA */}
                                 <Link to="/recuperar-password" className="text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline">
                                     ¿Olvidaste tu contraseña?
                                 </Link>
@@ -137,9 +124,10 @@ export const Login = () => {
                             </div>
                         </div>
 
+                        {/* 3. BOTÓN CON FEEDBACK VISUAL */}
                         <button
                             type="submit"
-                            disabled={isLoading}
+                            disabled={isLoading} // Se deshabilita para evitar doble click
                             className={`w-full font-bold py-3 px-4 rounded-lg transition duration-200 shadow-lg transform cursor-pointer
                                 ${isLoading ? 'bg-slate-500 cursor-not-allowed' : 'bg-slate-800 hover:bg-slate-900 hover:scale-[1.02] text-white'}
                             `}
@@ -161,12 +149,6 @@ export const Login = () => {
                     </div>
                 </div>
             </div>
-
-            {/* 4. RENDERIZAMOS EL MODAL AQUÍ AL FINAL */}
-            <PaymentModal
-                isOpen={showPaywall}
-                onClose={() => setShowPaywall(false)}
-            />
         </div>
     );
 };
