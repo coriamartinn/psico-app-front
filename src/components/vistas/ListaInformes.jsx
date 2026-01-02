@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
-import { FileText, Search, Download, Trash2, FileSignature, CheckCircle, Clock, Eye } from 'lucide-react';
+import { FileText, Search, Download, Trash2, FileSignature, CheckCircle, Clock, Eye, Edit } from 'lucide-react';
+import { useNavigate } from 'react-router-dom'; // 👈 1. IMPORTANTE: Para navegar
 
 export const ListaInformes = () => {
     const [informes, setInformes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [busqueda, setBusqueda] = useState("");
-    const [filtro, setFiltro] = useState("todos"); // 'todos', 'firmados', 'pendientes'
+    const [filtro, setFiltro] = useState("todos");
 
+    const navigate = useNavigate(); // 👈 2. INICIALIZAMOS EL HOOK
     const API_URL = import.meta.env.VITE_API_URL || "https://psico-app-backend-q5fm.onrender.com";
 
-    // Cargar informes desde la API
     useEffect(() => {
         fetchInformes();
     }, []);
@@ -34,7 +35,6 @@ export const ListaInformes = () => {
         }
     };
 
-    // ✨ NUEVA FUNCIÓN: Generar Vista Previa / PDF para Imprimir
     const handleVerPDF = async (id) => {
         try {
             const token = localStorage.getItem("token");
@@ -44,8 +44,6 @@ export const ListaInformes = () => {
 
             if (res.ok) {
                 const informe = await res.json();
-
-                // Abrimos una ventana nueva simple para imprimir
                 const ventana = window.open('', '_blank');
                 ventana.document.write(`
                     <html>
@@ -89,9 +87,7 @@ export const ListaInformes = () => {
                             </div>
                         ` : ''}
                         
-                        <script>
-                            setTimeout(() => { window.print(); }, 500);
-                        </script>
+                        <script>setTimeout(() => { window.print(); }, 500);</script>
                     </body>
                     </html>
                 `);
@@ -107,7 +103,6 @@ export const ListaInformes = () => {
 
     const handleFirmar = async (id) => {
         if (!confirm("¿Deseas firmar digitalmente este documento? Una vez firmado, no podrás editarlo.")) return;
-
         try {
             const token = localStorage.getItem("token");
             const res = await fetch(`${API_URL}/api/informes/${id}/firmar`, {
@@ -116,12 +111,11 @@ export const ListaInformes = () => {
             });
 
             if (res.ok) {
-                // Actualizar estado localmente
                 setInformes(prev => prev.map(inf =>
                     inf.id === id ? { ...inf, firmado: true } : inf
                 ));
             } else {
-                alert("Error al firmar. Intenta nuevamente.");
+                alert("Error al firmar.");
             }
         } catch (error) {
             console.error("Error de conexión", error);
@@ -129,8 +123,7 @@ export const ListaInformes = () => {
     };
 
     const handleDelete = async (id) => {
-        if (!confirm("¿Estás seguro de eliminar este informe? Esta acción no se puede deshacer.")) return;
-
+        if (!confirm("¿Estás seguro de eliminar este informe?")) return;
         try {
             const token = localStorage.getItem("token");
             await fetch(`${API_URL}/api/informes/${id}`, {
@@ -143,21 +136,17 @@ export const ListaInformes = () => {
         }
     };
 
-    // Filtrado lógico
     const informesFiltrados = informes.filter(inf => {
         const coincideBusqueda = inf.paciente.toLowerCase().includes(busqueda.toLowerCase());
         const coincideFiltro =
             filtro === "todos" ? true :
                 filtro === "firmados" ? inf.firmado :
                     filtro === "pendientes" ? !inf.firmado : true;
-
         return coincideBusqueda && coincideFiltro;
     });
 
     return (
         <div className="min-h-screen bg-gray-50 p-6 md:p-10 font-sans">
-
-            {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                 <div>
                     <h1 className="text-3xl font-extrabold text-slate-800 flex items-center gap-2">
@@ -167,10 +156,7 @@ export const ListaInformes = () => {
                 </div>
             </div>
 
-            {/* Barra de Herramientas */}
             <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 mb-6 flex flex-col md:flex-row gap-4 items-center justify-between">
-
-                {/* Buscador */}
                 <div className="relative w-full md:w-96">
                     <Search className="absolute left-3 top-3 text-slate-400" size={18} />
                     <input
@@ -181,17 +167,12 @@ export const ListaInformes = () => {
                         onChange={(e) => setBusqueda(e.target.value)}
                     />
                 </div>
-
-                {/* Filtros */}
                 <div className="flex bg-slate-100 p-1 rounded-xl">
                     {['todos', 'firmados', 'pendientes'].map((f) => (
                         <button
                             key={f}
                             onClick={() => setFiltro(f)}
-                            className={`px-4 py-1.5 rounded-lg text-xs font-bold capitalize transition ${filtro === f
-                                ? 'bg-white text-purple-700 shadow-sm'
-                                : 'text-slate-500 hover:text-slate-700'
-                                }`}
+                            className={`px-4 py-1.5 rounded-lg text-xs font-bold capitalize transition ${filtro === f ? 'bg-white text-purple-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                         >
                             {f}
                         </button>
@@ -199,7 +180,6 @@ export const ListaInformes = () => {
                 </div>
             </div>
 
-            {/* Lista de Informes */}
             <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                 {loading ? (
                     <div className="p-10 text-center text-slate-400">Cargando informes...</div>
@@ -213,7 +193,6 @@ export const ListaInformes = () => {
                         <thead>
                             <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
                                 <th className="p-4 font-bold border-b border-slate-100">Paciente</th>
-                                <th className="p-4 font-bold border-b border-slate-100">Tipo de Informe</th>
                                 <th className="p-4 font-bold border-b border-slate-100">Fecha</th>
                                 <th className="p-4 font-bold border-b border-slate-100">Estado</th>
                                 <th className="p-4 font-bold border-b border-slate-100 text-right">Acciones</th>
@@ -223,7 +202,6 @@ export const ListaInformes = () => {
                             {informesFiltrados.map((inf) => (
                                 <tr key={inf.id} className="hover:bg-slate-50 transition">
                                     <td className="p-4 font-bold text-slate-700">{inf.paciente}</td>
-                                    <td className="p-4 text-sm text-slate-600">{inf.tipo}</td>
                                     <td className="p-4 text-sm text-slate-500">{inf.fecha}</td>
                                     <td className="p-4">
                                         {inf.firmado ? (
@@ -237,6 +215,18 @@ export const ListaInformes = () => {
                                         )}
                                     </td>
                                     <td className="p-4 flex justify-end gap-2">
+
+                                        {/* 👇 AQUÍ ESTÁ EL BOTÓN DE EDITAR QUE FALTABA */}
+                                        {!inf.firmado && (
+                                            <button
+                                                onClick={() => navigate(`/informes/editar/${inf.id}`)}
+                                                className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition"
+                                                title="Editar Informe"
+                                            >
+                                                <Edit size={18} />
+                                            </button>
+                                        )}
+
                                         {!inf.firmado && (
                                             <button
                                                 onClick={() => handleFirmar(inf.id)}
@@ -247,10 +237,9 @@ export const ListaInformes = () => {
                                             </button>
                                         )}
 
-                                        {/* BOTÓN VER/DESCARGAR CONECTADO */}
                                         <button
                                             onClick={() => handleVerPDF(inf.id)}
-                                            className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition"
+                                            className="p-2 text-purple-500 hover:bg-purple-50 rounded-lg transition"
                                             title="Ver e Imprimir PDF"
                                         >
                                             <Eye size={18} />
