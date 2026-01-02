@@ -21,6 +21,7 @@ import { RecuperarPassword } from "./components/auth/RecuperarPassword";
 import { Dashboard } from "./components/vistas/Dashboard";
 import { Herramientas } from "./components/vistas/Herramientas";
 import { ListaInformes } from "./components/vistas/ListaInformes";
+import { NuevoInforme } from "./components/vistas/NuevoInforme"; // 👈 1. IMPORTAMOS EL NUEVO COMPONENTE
 import { Perfil } from "./components/Perfil";
 import { PantallaPago } from "./components/vistas/PantallaPago";
 
@@ -64,9 +65,7 @@ function App() {
 
   return (
     <DatosProvider>
-
-
-      {/* 👈 3. Agregamos este div con pt-10 (padding top) para que el banner no tape el contenido */}
+      {/* 3. Agregamos este div con pt-10 para que el banner no tape el contenido */}
       <div className="pt-10 h-screen w-full">
         <Routes>
 
@@ -98,6 +97,10 @@ function App() {
                 element={<GeneradorInforme pacienteActual={pacienteSeleccionado} />}
               />
               <Route path="/lista-informes" element={<ListaInformes />} />
+
+              {/* 👇 2. AQUÍ AGREGAMOS LA RUTA NUEVA */}
+              <Route path="/nuevo-informe" element={<NuevoInforme />} />
+              <Route path="/historial" element={<ListaInformes />} /> {/* Alias opcional para lista-informes */}
 
               {/* 4. HERRAMIENTAS Y EXTRAS */}
               <Route path="/herramientas" element={<Herramientas />} />
