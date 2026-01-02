@@ -2,11 +2,12 @@
 import { useState, useEffect } from 'react';
 import { PDFViewer, PDFDownloadLink } from '@react-pdf/renderer';
 import { DocumentoPDF } from './DocumentoPdf';
-import { FileText, Download, FolderOpen, User, RefreshCw, Image as ImageIcon, Trash2 } from 'lucide-react';
+import { FileText, Download, FolderOpen, User, RefreshCw, Image as ImageIcon, Trash2, Save } from 'lucide-react';
 import { useDatos } from "./context/DatosContext";
 
 export const GeneradorInforme = ({ pacienteActual: pacienteInicial }) => {
     const { imagenes, guardarImagenGrafico } = useDatos();
+    const [guardando, setGuardando] = useState(false); // Estado para el loading del guardado
 
     // URL Inteligente
     const API_URL = import.meta.env.VITE_API_URL || "https://psico-app-backend-q5fm.onrender.com";
@@ -80,6 +81,46 @@ export const GeneradorInforme = ({ pacienteActual: pacienteInicial }) => {
     const handlePacienteChange = (e) => {
         const p = listaPacientes.find(x => x.id === Number(e.target.value));
         if (p) setPaciente(p);
+    };
+
+    // --- NUEVA FUNCIÓN: GUARDAR EN BASE DE DATOS ---
+    const handleGuardar = async () => {
+        if (!paciente) return alert("Por favor selecciona un paciente primero.");
+
+        setGuardando(true);
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch(`${API_URL}/api/informes`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    paciente_id: paciente.id,
+                    motivo: contenido.motivo,
+                    tecnicas: contenido.tecnicas,
+                    cognitivo: contenido.cognitivo,
+                    lectoescritura: contenido.lectoescritura,
+                    conclusiones: contenido.conclusiones
+                    // Nota: Si quieres guardar las imágenes en la BD, deberías procesarlas aquí también,
+                    // pero usualmente se guardan solo las referencias o texto.
+                })
+            });
+
+            if (res.ok) {
+                alert("¡Informe guardado exitosamente en el Historial!");
+                // Opcional: Podrías limpiar el formulario aquí si quisieras
+            } else {
+                const errorData = await res.json();
+                alert("Error al guardar: " + (errorData.message || "Error desconocido"));
+            }
+        } catch (error) {
+            console.error("Error al guardar:", error);
+            alert("Error de conexión al intentar guardar.");
+        } finally {
+            setGuardando(false);
+        }
     };
 
     return (
@@ -184,17 +225,30 @@ export const GeneradorInforme = ({ pacienteActual: pacienteInicial }) => {
                     </div>
                 )}
 
-                {/* Footer con Botón de Descarga */}
+                {/* Footer con Botones de Acción */}
                 {paciente && (
-                    <div className="p-4 bg-white border-t border-gray-200 z-20">
+                    <div className="p-4 bg-white border-t border-gray-200 z-20 flex gap-3 flex-col sm:flex-row">
+
+                        {/* BOTÓN GUARDAR */}
+                        <button
+                            onClick={handleGuardar}
+                            disabled={guardando}
+                            className="flex-1 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg shadow-lg flex justify-center items-center gap-2 transition transform active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
+                        >
+                            {guardando ? <RefreshCw className="animate-spin" size={20} /> : <Save size={20} />}
+                            {guardando ? "Guardando..." : "Guardar en Historial"}
+                        </button>
+
+                        {/* BOTÓN DESCARGAR (PDF) */}
                         <PDFDownloadLink
                             document={<DocumentoPDF paciente={paciente} contenido={contenido} profesional={profesional} imagenes={imagenes} />}
                             fileName={`Informe_${paciente.last_name}_${new Date().toLocaleDateString().replace(/\//g, '-')}.pdf`}
+                            className="flex-1"
                         >
                             {({ loading }) => (
                                 <button disabled={loading} className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-lg flex justify-center items-center gap-2 transition transform active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed">
                                     {loading ? <RefreshCw className="animate-spin" size={20} /> : <Download size={20} />}
-                                    {loading ? "Generando PDF..." : "Descargar Informe PDF"}
+                                    {loading ? "Generando PDF..." : "Descargar PDF"}
                                 </button>
                             )}
                         </PDFDownloadLink>

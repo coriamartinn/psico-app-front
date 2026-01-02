@@ -21,7 +21,6 @@ import { RecuperarPassword } from "./components/auth/RecuperarPassword";
 import { Dashboard } from "./components/vistas/Dashboard";
 import { Herramientas } from "./components/vistas/Herramientas";
 import { ListaInformes } from "./components/vistas/ListaInformes";
-import { NuevoInforme } from "./components/vistas/NuevoInforme"; // 👈 1. IMPORTAMOS EL NUEVO COMPONENTE
 import { Perfil } from "./components/Perfil";
 import { PantallaPago } from "./components/vistas/PantallaPago";
 
@@ -99,7 +98,6 @@ function App() {
               <Route path="/lista-informes" element={<ListaInformes />} />
 
               {/* 👇 2. AQUÍ AGREGAMOS LA RUTA NUEVA */}
-              <Route path="/nuevo-informe" element={<NuevoInforme />} />
               <Route path="/historial" element={<ListaInformes />} /> {/* Alias opcional para lista-informes */}
 
               {/* 4. HERRAMIENTAS Y EXTRAS */}
