@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FileText, Search, Download, Trash2, FileSignature, CheckCircle, Clock } from 'lucide-react';
+import { FileText, Search, Download, Trash2, FileSignature, CheckCircle, Clock, Eye } from 'lucide-react';
 
 export const ListaInformes = () => {
     const [informes, setInformes] = useState([]);
@@ -17,7 +17,6 @@ export const ListaInformes = () => {
     const fetchInformes = async () => {
         try {
             const token = localStorage.getItem("token");
-            // Asumo que tienes una ruta /api/informes. Si no, ajusta esta URL
             const res = await fetch(`${API_URL}/api/informes`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -26,12 +25,7 @@ export const ListaInformes = () => {
                 const data = await res.json();
                 setInformes(data);
             } else {
-                // Mock data temporal si no hay backend aún para esto
-                setInformes([
-                    { id: 1, paciente: "Martín Coria", fecha: "2024-03-10", tipo: "Evaluación WISC-V", firmado: true },
-                    { id: 2, paciente: "Lucía Gomez", fecha: "2024-03-12", tipo: "Informe Evolutivo", firmado: false },
-                    { id: 3, paciente: "Pedro Almodovar", fecha: "2024-03-15", tipo: "Alta Clínica", firmado: false },
-                ]);
+                console.error("Error al cargar informes");
             }
         } catch (error) {
             console.error("Error al obtener informes", error);
@@ -40,12 +34,82 @@ export const ListaInformes = () => {
         }
     };
 
+    // ✨ NUEVA FUNCIÓN: Generar Vista Previa / PDF para Imprimir
+    const handleVerPDF = async (id) => {
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch(`${API_URL}/api/informes/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                const informe = await res.json();
+
+                // Abrimos una ventana nueva simple para imprimir
+                const ventana = window.open('', '_blank');
+                ventana.document.write(`
+                    <html>
+                    <head>
+                        <title>Informe - ${informe.first_name} ${informe.last_name}</title>
+                        <style>
+                            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; max-width: 800px; margin: auto; color: #333; }
+                            h1 { color: #2d3748; border-bottom: 2px solid #805ad5; padding-bottom: 10px; margin-bottom: 20px; }
+                            .header { margin-bottom: 40px; background: #f7fafc; padding: 20px; border-radius: 8px; }
+                            .section { margin-bottom: 25px; }
+                            h3 { color: #805ad5; margin-bottom: 8px; font-size: 1.1em; border-left: 4px solid #805ad5; padding-left: 10px; }
+                            p { line-height: 1.6; text-align: justify; margin-top: 0; }
+                            .firma-container { margin-top: 60px; display: flex; justify-content: flex-end; }
+                            .firma-box { text-align: center; border-top: 1px solid #333; padding-top: 10px; width: 250px; }
+                            .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 80px; color: rgba(0,0,0,0.05); z-index: -1; pointer-events: none; }
+                        </style>
+                    </head>
+                    <body>
+                        ${informe.status !== 'firmado' ? '<div class="watermark">BORRADOR</div>' : ''}
+                        
+                        <div class="header">
+                            <h1>Informe Psicopedagógico</h1>
+                            <p><strong>Paciente:</strong> ${informe.first_name} ${informe.last_name}</p>
+                            <p><strong>Fecha de Emisión:</strong> ${new Date(informe.created_at).toLocaleDateString('es-AR')}</p>
+                            <p><strong>Profesional:</strong> Lic. Martín Coria</p> 
+                        </div>
+
+                        <div class="section"><h3>Motivo de Consulta</h3><p>${informe.motivo || 'No especificado'}</p></div>
+                        <div class="section"><h3>Técnicas Aplicadas</h3><p>${informe.tecnicas || 'No especificado'}</p></div>
+                        <div class="section"><h3>Aspectos Cognitivos</h3><p>${informe.cognitivo || 'No especificado'}</p></div>
+                        <div class="section"><h3>Lectoescritura</h3><p>${informe.lectoescritura || 'No especificado'}</p></div>
+                        <div class="section"><h3>Conclusiones</h3><p>${informe.conclusiones || 'No especificado'}</p></div>
+
+                        ${informe.status === 'firmado' ? `
+                            <div class="firma-container">
+                                <div class="firma-box">
+                                    <p>Lic. Martín Coria</p>
+                                    <p style="font-size: 0.8em; color: #666;">Psicopedagogo - Mat. 1234</p>
+                                    <p style="font-size: 0.7em; color: green;">✔ Documento Firmado Digitalmente</p>
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        <script>
+                            setTimeout(() => { window.print(); }, 500);
+                        </script>
+                    </body>
+                    </html>
+                `);
+                ventana.document.close();
+            } else {
+                alert("No se pudo cargar el detalle del informe.");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Error al cargar el documento");
+        }
+    };
+
     const handleFirmar = async (id) => {
-        if (!confirm("¿Deseas firmar digitalmente este documento?")) return;
+        if (!confirm("¿Deseas firmar digitalmente este documento? Una vez firmado, no podrás editarlo.")) return;
 
         try {
             const token = localStorage.getItem("token");
-            // Aquí llamarías a tu endpoint PUT /api/informes/:id/firmar
             const res = await fetch(`${API_URL}/api/informes/${id}/firmar`, {
                 method: 'PUT',
                 headers: { Authorization: `Bearer ${token}` }
@@ -125,8 +189,8 @@ export const ListaInformes = () => {
                             key={f}
                             onClick={() => setFiltro(f)}
                             className={`px-4 py-1.5 rounded-lg text-xs font-bold capitalize transition ${filtro === f
-                                    ? 'bg-white text-purple-700 shadow-sm'
-                                    : 'text-slate-500 hover:text-slate-700'
+                                ? 'bg-white text-purple-700 shadow-sm'
+                                : 'text-slate-500 hover:text-slate-700'
                                 }`}
                         >
                             {f}
@@ -182,9 +246,16 @@ export const ListaInformes = () => {
                                                 <FileSignature size={18} />
                                             </button>
                                         )}
-                                        <button className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition" title="Descargar PDF">
-                                            <Download size={18} />
+
+                                        {/* BOTÓN VER/DESCARGAR CONECTADO */}
+                                        <button
+                                            onClick={() => handleVerPDF(inf.id)}
+                                            className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition"
+                                            title="Ver e Imprimir PDF"
+                                        >
+                                            <Eye size={18} />
                                         </button>
+
                                         <button
                                             onClick={() => handleDelete(inf.id)}
                                             className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition"
