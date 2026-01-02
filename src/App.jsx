@@ -95,10 +95,13 @@ function App() {
                 path="/informes"
                 element={<GeneradorInforme pacienteActual={pacienteSeleccionado} />}
               />
-              <Route path="/lista-informes" element={<ListaInformes />} />
 
-              {/* 👇 2. AQUÍ AGREGAMOS LA RUTA NUEVA */}
-              <Route path="/historial" element={<ListaInformes />} /> {/* Alias opcional para lista-informes */}
+              {/* 👇👇 RUTA DE EDICIÓN AGREGADA AQUÍ 👇👇 */}
+              {/* Usamos el mismo componente GeneradorInforme, pero la URL tiene un ID */}
+              <Route path="/informes/editar/:id" element={<GeneradorInforme />} />
+
+              <Route path="/lista-informes" element={<ListaInformes />} />
+              <Route path="/historial" element={<ListaInformes />} />
 
               {/* 4. HERRAMIENTAS Y EXTRAS */}
               <Route path="/herramientas" element={<Herramientas />} />

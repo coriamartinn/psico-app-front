@@ -1,13 +1,18 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { PDFViewer, PDFDownloadLink } from '@react-pdf/renderer';
 import { DocumentoPDF } from './DocumentoPdf';
-import { FileText, Download, FolderOpen, User, RefreshCw, Image as ImageIcon, Trash2, Save } from 'lucide-react';
+import { FileText, Download, FolderOpen, User, RefreshCw, Image as ImageIcon, Trash2, Save, Edit } from 'lucide-react';
 import { useDatos } from "./context/DatosContext";
 
 export const GeneradorInforme = ({ pacienteActual: pacienteInicial }) => {
     const { imagenes, guardarImagenGrafico } = useDatos();
-    const [guardando, setGuardando] = useState(false); // Estado para el loading del guardado
+    const { id } = useParams(); // Detecta si estamos editando
+    const navigate = useNavigate();
+
+    const [guardando, setGuardando] = useState(false);
+    const [modoEdicion, setModoEdicion] = useState(false);
 
     // URL Inteligente
     const API_URL = import.meta.env.VITE_API_URL || "https://psico-app-backend-q5fm.onrender.com";
@@ -39,42 +44,62 @@ export const GeneradorInforme = ({ pacienteActual: pacienteInicial }) => {
         conclusiones: ""
     });
 
-    // Carga de pacientes desde el Backend
+    // 1. Cargar lista de pacientes
     useEffect(() => {
-        let montado = true;
         const token = localStorage.getItem('token');
-
         if (!token) return;
 
         fetch(`${API_URL}/api/pacientes`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
+            headers: { 'Authorization': `Bearer ${token}` }
         })
             .then(r => r.json())
             .then(d => {
-                if (montado) {
-                    if (Array.isArray(d)) {
-                        setListaPacientes(d);
-                    } else {
-                        console.error("La API no devolvió un array:", d);
-                        setListaPacientes([]);
-                    }
-                }
+                if (Array.isArray(d)) setListaPacientes(d);
             })
-            .catch(err => console.error("Error fetching pacientes:", err));
-
-        return () => { montado = false };
+            .catch(err => console.error(err));
     }, []);
 
-    // Actualizar paciente si cambia la prop inicial
+    // 2. DETECTAR MODO EDICIÓN Y CARGAR DATOS
     useEffect(() => {
-        if (pacienteInicial) {
-            setPaciente(prev => (prev && prev.id === pacienteInicial.id) ? prev : pacienteInicial);
+        if (id) {
+            setModoEdicion(true);
+            const cargarInforme = async () => {
+                try {
+                    const token = localStorage.getItem("token");
+                    const res = await fetch(`${API_URL}/api/informes/${id}`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+
+                    if (res.ok) {
+                        const data = await res.json();
+                        setContenido({
+                            motivo: data.motivo || "",
+                            tecnicas: data.tecnicas || "",
+                            cognitivo: data.cognitivo || "",
+                            lectoescritura: data.lectoescritura || "",
+                            conclusiones: data.conclusiones || ""
+                        });
+
+                        // Sincronizar paciente cuando cargue la lista
+                        if (listaPacientes.length > 0) {
+                            const pac = listaPacientes.find(p => p.id === data.patient_id);
+                            if (pac) setPaciente(pac);
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error cargando informe:", error);
+                }
+            };
+            cargarInforme();
         }
-    }, [pacienteInicial]);
+    }, [id, listaPacientes]); // Dependencia clave: listaPacientes
+
+    // Sincronizar paciente inicial si viene por props (creación)
+    useEffect(() => {
+        if (pacienteInicial && !id) {
+            setPaciente(pacienteInicial);
+        }
+    }, [pacienteInicial, id]);
 
     const handleChange = (e) => setContenido({ ...contenido, [e.target.name]: e.target.value });
 
@@ -83,41 +108,43 @@ export const GeneradorInforme = ({ pacienteActual: pacienteInicial }) => {
         if (p) setPaciente(p);
     };
 
-    // --- NUEVA FUNCIÓN: GUARDAR EN BASE DE DATOS ---
+    // --- FUNCIÓN UNIFICADA: GUARDAR O ACTUALIZAR ---
     const handleGuardar = async () => {
-        if (!paciente) return alert("Por favor selecciona un paciente primero.");
+        if (!paciente) return alert("Por favor selecciona un paciente.");
 
         setGuardando(true);
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/api/informes`, {
-                method: 'POST',
+            const url = modoEdicion
+                ? `${API_URL}/api/informes/${id}` // PUT
+                : `${API_URL}/api/informes`;      // POST
+
+            const metodo = modoEdicion ? 'PUT' : 'POST';
+
+            const res = await fetch(url, {
+                method: metodo,
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
                     paciente_id: paciente.id,
-                    motivo: contenido.motivo,
-                    tecnicas: contenido.tecnicas,
-                    cognitivo: contenido.cognitivo,
-                    lectoescritura: contenido.lectoescritura,
-                    conclusiones: contenido.conclusiones
-                    // Nota: Si quieres guardar las imágenes en la BD, deberías procesarlas aquí también,
-                    // pero usualmente se guardan solo las referencias o texto.
+                    ...contenido
                 })
             });
 
             if (res.ok) {
-                alert("¡Informe guardado exitosamente en el Historial!");
-                // Opcional: Podrías limpiar el formulario aquí si quisieras
+                alert(modoEdicion ? "¡Informe actualizado correctamente!" : "¡Informe guardado en el Historial!");
+                if (modoEdicion) {
+                    navigate('/lista-informes'); // Volver a la lista tras editar
+                }
             } else {
                 const errorData = await res.json();
-                alert("Error al guardar: " + (errorData.message || "Error desconocido"));
+                alert("Error: " + (errorData.message || "No se pudo guardar"));
             }
         } catch (error) {
-            console.error("Error al guardar:", error);
-            alert("Error de conexión al intentar guardar.");
+            console.error(error);
+            alert("Error de conexión");
         } finally {
             setGuardando(false);
         }
@@ -132,7 +159,9 @@ export const GeneradorInforme = ({ pacienteActual: pacienteInicial }) => {
                 <div className="p-4 bg-slate-800 text-white flex flex-col gap-3 shadow-md">
                     <div className="flex items-center gap-2 mb-1">
                         <FileText className="text-blue-400" size={24} />
-                        <h2 className="font-bold text-xl tracking-wide">Redacción de Informe</h2>
+                        <h2 className="font-bold text-xl tracking-wide">
+                            {modoEdicion ? "Editando Informe" : "Redacción de Informe"}
+                        </h2>
                     </div>
 
                     <div className="flex gap-3 items-center">
@@ -144,6 +173,7 @@ export const GeneradorInforme = ({ pacienteActual: pacienteInicial }) => {
                                 className="w-full h-10 pl-10 pr-4 rounded-lg bg-white text-slate-900 border-none focus:ring-2 focus:ring-blue-500 font-medium cursor-pointer shadow-sm text-sm"
                                 onChange={handlePacienteChange}
                                 value={paciente?.id || ""}
+                                disabled={modoEdicion} // Bloqueado al editar
                             >
                                 <option value="" disabled>Seleccionar Paciente...</option>
                                 {listaPacientes.map(p => (
@@ -229,14 +259,15 @@ export const GeneradorInforme = ({ pacienteActual: pacienteInicial }) => {
                 {paciente && (
                     <div className="p-4 bg-white border-t border-gray-200 z-20 flex gap-3 flex-col sm:flex-row">
 
-                        {/* BOTÓN GUARDAR */}
+                        {/* BOTÓN DINÁMICO: CREAR O ACTUALIZAR */}
                         <button
                             onClick={handleGuardar}
                             disabled={guardando}
-                            className="flex-1 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg shadow-lg flex justify-center items-center gap-2 transition transform active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
+                            className={`flex-1 py-3 font-bold rounded-lg shadow-lg flex justify-center items-center gap-2 transition transform active:scale-95 disabled:opacity-70 
+                                ${modoEdicion ? 'bg-orange-500 hover:bg-orange-600 text-white' : 'bg-purple-600 hover:bg-purple-700 text-white'}`}
                         >
-                            {guardando ? <RefreshCw className="animate-spin" size={20} /> : <Save size={20} />}
-                            {guardando ? "Guardando..." : "Guardar en Historial"}
+                            {guardando ? <RefreshCw className="animate-spin" size={20} /> : (modoEdicion ? <Edit size={20} /> : <Save size={20} />)}
+                            {guardando ? "Procesando..." : (modoEdicion ? "Actualizar Informe" : "Guardar en Historial")}
                         </button>
 
                         {/* BOTÓN DESCARGAR (PDF) */}
