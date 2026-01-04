@@ -149,6 +149,7 @@ export const ListaPacientes = ({ setPacienteSeleccionado }) => {
                                 <th className="px-6 py-4">Escolaridad</th>
                                 <th className="px-6 py-4 text-center">Carpeta</th>
                                 <th className="px-6 py-4 text-center">Acciones</th>
+                                <th className="px-6 py-4 text-center">Contacto Padres</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
@@ -166,7 +167,7 @@ export const ListaPacientes = ({ setPacienteSeleccionado }) => {
 
                                     <td className="px-6 py-4">
                                         <span className="bg-purple-100 text-purple-800 text-xs font-bold px-3 py-1 rounded-full">
-                                            {paciente.diagnosis || "Evaluación"}
+                                            {paciente.diagnosis || "En proceso de evaluación..."}
                                         </span>
                                     </td>
 
@@ -222,6 +223,11 @@ export const ListaPacientes = ({ setPacienteSeleccionado }) => {
                                             >
                                                 <Trash2 size={18} />
                                             </button>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="text-gray-800 font-medium">
+                                            {paciente.parent_contact || "-"}
                                         </div>
                                     </td>
                                 </tr>
