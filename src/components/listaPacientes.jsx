@@ -183,7 +183,11 @@ export const ListaPacientes = ({ setPacienteSeleccionado }) => {
                                     <td className="px-6 py-4 text-center flex justify-center">
                                         <BotonDrive url={paciente.drive_link} />
                                     </td>
-
+                                    <td className="px-6 py-4 text-center">
+                                        <div className="text-gray-800 font-medium">
+                                            {paciente.parent_contact || "-"}
+                                        </div>
+                                    </td>
                                     <td className="px-6 py-4 text-center">
                                         <div className="flex justify-center gap-3 items-center">
 
@@ -223,11 +227,6 @@ export const ListaPacientes = ({ setPacienteSeleccionado }) => {
                                             >
                                                 <Trash2 size={18} />
                                             </button>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="text-gray-800 font-medium">
-                                            {paciente.parent_contact || "-"}
                                         </div>
                                     </td>
                                 </tr>
