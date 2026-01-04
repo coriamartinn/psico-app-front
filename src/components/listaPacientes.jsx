@@ -148,8 +148,8 @@ export const ListaPacientes = ({ setPacienteSeleccionado }) => {
                                 <th className="px-6 py-4">Diagnóstico</th>
                                 <th className="px-6 py-4">Escolaridad</th>
                                 <th className="px-6 py-4 text-center">Carpeta</th>
-                                <th className="px-6 py-4 text-center">Acciones</th>
                                 <th className="px-6 py-4 text-center">Contacto Padres</th>
+                                <th className="px-6 py-4 text-center">Acciones</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
