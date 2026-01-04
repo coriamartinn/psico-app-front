@@ -42,6 +42,12 @@ export const ListaInformes = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
+            const usuarioLogueado = JSON.parse(localStorage.getItem("usuario")) || {};
+            const nombreProfesional = usuarioLogueado.first_name ?
+                `${usuarioLogueado.first_name} ${usuarioLogueado.last_name}`
+                : "Profesional";
+            const matriculaProfesional = usuarioLogueado.matricula || "N/A";
+
             if (res.ok) {
                 const informe = await res.json();
                 const ventana = window.open('', '_blank');
@@ -80,8 +86,8 @@ export const ListaInformes = () => {
                         ${informe.status === 'firmado' ? `
                             <div class="firma-container">
                                 <div class="firma-box">
-                                    <p>Lic. Martín Coria</p>
-                                    <p style="font-size: 0.8em; color: #666;">Psicopedagogo - Mat. 1234</p>
+                                    <p>Lic. ${nombreProfesional}</p>
+                                    <p style="font-size: 0.8em; color: #666;">Psicopedagogia - Mat. ${matriculaProfesional}</p>
                                     <p style="font-size: 0.7em; color: green;">✔ Documento Firmado Digitalmente</p>
                                 </div>
                             </div>
