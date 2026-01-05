@@ -110,7 +110,7 @@ export const PantallaPago = () => {
 
                         <h3 className="text-xl font-bold text-slate-800">Plan Premium</h3>
                         <div className="flex flex-col items-center">
-                            <p className="text-4xl font-extrabold text-purple-600">$15.000 <span className="text-sm text-slate-400 font-normal">/ mes</span></p>
+                            <p className="text-4xl font-extrabold text-purple-600">$75000 <span className="text-sm text-slate-400 font-normal">/ mes</span></p>
                             <p className="text-xs text-slate-400 mt-1 line-through decoration-red-400">Primer mes $15.000</p>
                             <p className="text-sm font-bold text-green-600">Hoy pagas $0</p>
                         </div>
