@@ -145,8 +145,8 @@ export const ListaPacientes = ({ setPacienteSeleccionado }) => {
                         <thead className="uppercase tracking-wider border-b border-gray-200 bg-gray-50 text-gray-500 font-semibold">
                             <tr>
                                 <th className="px-6 py-4">Paciente</th>
-                                <th className="px-6 py-4">Diagnóstico</th>
-                                <th className="px-6 py-4">Escolaridad</th>
+                                <th className="px-6 py-4">Motivo</th>
+                                <th className="px-6 py-4">Grado escolar</th>
                                 <th className="px-6 py-4 text-center">Carpeta</th>
                                 <th className="px-6 py-4 text-center">Contacto Padres</th>
                                 <th className="px-6 py-4 text-center">Contacto escuela</th>
