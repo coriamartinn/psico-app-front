@@ -43,8 +43,8 @@ export const ListaInformes = () => {
             });
 
             const usuarioLogueado = JSON.parse(localStorage.getItem("usuario")) || {};
-            const nombreProfesional = usuarioLogueado.first_name ?
-                `${usuarioLogueado.first_name} ${usuarioLogueado.last_name}`
+            const nombreProfesional = usuarioLogueado.first_name
+                ? `${usuarioLogueado.first_name} ${usuarioLogueado.last_name}`
                 : "Profesional";
             const matriculaProfesional = usuarioLogueado.matricula || "N/A";
 

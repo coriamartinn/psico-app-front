@@ -25,6 +25,7 @@ export const FormularioPaciente = () => {
         diagnosis: "",
         school_grade: "",
         school_name: "",
+        school_contact: "",
         parent_contact: "",
         drive_link: "",
         birth_date: ""
@@ -57,6 +58,7 @@ export const FormularioPaciente = () => {
                             diagnosis: data.diagnosis || "",
                             school_grade: data.school_grade || "",
                             school_name: data.school_name || "",
+                            school_contact: data.school_contact || "",
                             parent_contact: data.parent_contact || "",
                             drive_link: data.drive_link || "",
                             birth_date: fechaFormateada
@@ -194,6 +196,17 @@ export const FormularioPaciente = () => {
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><Building size={18} className="text-slate-400" /></div>
                                     <input type="text" name="school_name" placeholder="Ej: Instituto French" className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" value={datos.school_name} onChange={handleChange} />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Contacto escuela */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">Contacto de la institución</label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><GraduationCap size={18} className="text-slate-400" /></div>
+                                    <input type="text" name="school_contact" placeholder="Ej: 3° Grado" className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" value={datos.school_contact} onChange={handleChange} />
                                 </div>
                             </div>
                         </div>
