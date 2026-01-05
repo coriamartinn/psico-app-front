@@ -149,6 +149,7 @@ export const ListaPacientes = ({ setPacienteSeleccionado }) => {
                                 <th className="px-6 py-4">Escolaridad</th>
                                 <th className="px-6 py-4 text-center">Carpeta</th>
                                 <th className="px-6 py-4 text-center">Contacto Padres</th>
+                                <th className="px-6 py-4 text-center">Contacto escuela</th>
                                 <th className="px-6 py-4 text-center">Acciones</th>
                             </tr>
                         </thead>
@@ -186,6 +187,11 @@ export const ListaPacientes = ({ setPacienteSeleccionado }) => {
                                     <td className="px-6 py-4 text-center">
                                         <div className="text-gray-800 font-medium">
                                             {paciente.parent_contact || "-"}
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 text-center">
+                                        <div className="text-gray-800 font-medium">
+                                            {paciente.school_contact || "-"}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 text-center">
