@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FileText, Search, Download, Trash2, FileSignature, CheckCircle, Clock, Eye, Edit } from 'lucide-react';
-import { useNavigate } from 'react-router-dom'; // 👈 1. IMPORTANTE: Para navegar
+import { useNavigate } from 'react-router-dom';
 
 export const ListaInformes = () => {
     const [informes, setInformes] = useState([]);
@@ -8,7 +8,7 @@ export const ListaInformes = () => {
     const [busqueda, setBusqueda] = useState("");
     const [filtro, setFiltro] = useState("todos");
 
-    const navigate = useNavigate(); // 👈 2. INICIALIZAMOS EL HOOK
+    const navigate = useNavigate();
     const API_URL = import.meta.env.VITE_API_URL || "https://psico-app-backend-q5fm.onrender.com";
 
     useEffect(() => {
@@ -35,21 +35,35 @@ export const ListaInformes = () => {
         }
     };
 
+    // 👇 LÓGICA CORREGIDA PARA CAMPOS EN INGLÉS (BD)
     const handleVerPDF = async (id) => {
         try {
             const token = localStorage.getItem("token");
+
+            // 1. Pedimos el informe al Backend
             const res = await fetch(`${API_URL}/api/informes/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
+            // 2. Leemos el usuario local por si acaso
             const usuarioLogueado = JSON.parse(localStorage.getItem("usuario")) || {};
-            const nombreProfesional = usuarioLogueado.first_name
-                ? `${usuarioLogueado.first_name} ${usuarioLogueado.last_name}`
-                : "Profesional";
-            const matriculaProfesional = usuarioLogueado.matricula || "N/A";
 
             if (res.ok) {
                 const informe = await res.json();
+
+                // --- VARIABLE MAESTRA (EN INGLÉS) ---
+                // 1. Si el backend manda 'informe.profesional' (el string combinado), usamos ese.
+                // 2. Si no, usamos first_name + last_name del localStorage (tu BD).
+                // 3. Fallback a "Profesional".
+                const nombreFinal = informe.profesional
+                    || (usuarioLogueado.first_name && usuarioLogueado.last_name ? `${usuarioLogueado.first_name} ${usuarioLogueado.last_name}` : null)
+                    || "Profesional";
+
+                const matriculaFinal = informe.matricula
+                    || usuarioLogueado.matricula
+                    || "Mat. Pendiente";
+                // -------------------------------------
+
                 const ventana = window.open('', '_blank');
                 ventana.document.write(`
                     <html>
@@ -74,7 +88,8 @@ export const ListaInformes = () => {
                             <h1>Informe Psicopedagógico</h1>
                             <p><strong>Paciente:</strong> ${informe.first_name} ${informe.last_name}</p>
                             <p><strong>Fecha de Emisión:</strong> ${new Date(informe.created_at).toLocaleDateString('es-AR')}</p>
-                            <p><strong>Profesional:</strong> Lic. ${nombreProfesional}</p> 
+                            
+                            <p><strong>Profesional:</strong> Lic. ${nombreFinal}</p> 
                         </div>
 
                         <div class="section"><h3>Motivo de Consulta</h3><p>${informe.motivo || 'No especificado'}</p></div>
@@ -86,8 +101,8 @@ export const ListaInformes = () => {
                         ${informe.status === 'firmado' ? `
                             <div class="firma-container">
                                 <div class="firma-box">
-                                    <p>Lic. ${nombreProfesional}</p>
-                                    <p style="font-size: 0.8em; color: #666;">Psicopedagogia - Mat. ${matriculaProfesional}</p>
+                                    <p>Lic. ${nombreFinal}</p>
+                                    <p style="font-size: 0.8em; color: #666;">Psicopedagogía - ${matriculaFinal}</p>
                                     <p style="font-size: 0.7em; color: green;">✔ Documento Firmado Digitalmente</p>
                                 </div>
                             </div>
@@ -221,8 +236,6 @@ export const ListaInformes = () => {
                                         )}
                                     </td>
                                     <td className="p-4 flex justify-end gap-2">
-
-                                        {/* 👇 AQUÍ ESTÁ EL BOTÓN DE EDITAR QUE FALTABA */}
                                         {!inf.firmado && (
                                             <button
                                                 onClick={() => navigate(`/informes/editar/${inf.id}`)}
@@ -232,7 +245,6 @@ export const ListaInformes = () => {
                                                 <Edit size={18} />
                                             </button>
                                         )}
-
                                         {!inf.firmado && (
                                             <button
                                                 onClick={() => handleFirmar(inf.id)}
@@ -242,7 +254,6 @@ export const ListaInformes = () => {
                                                 <FileSignature size={18} />
                                             </button>
                                         )}
-
                                         <button
                                             onClick={() => handleVerPDF(inf.id)}
                                             className="p-2 text-purple-500 hover:bg-purple-50 rounded-lg transition"
@@ -250,7 +261,6 @@ export const ListaInformes = () => {
                                         >
                                             <Eye size={18} />
                                         </button>
-
                                         <button
                                             onClick={() => handleDelete(inf.id)}
                                             className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition"
