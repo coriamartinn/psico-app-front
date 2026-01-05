@@ -74,7 +74,7 @@ export const ListaInformes = () => {
                             <h1>Informe Psicopedagógico</h1>
                             <p><strong>Paciente:</strong> ${informe.first_name} ${informe.last_name}</p>
                             <p><strong>Fecha de Emisión:</strong> ${new Date(informe.created_at).toLocaleDateString('es-AR')}</p>
-                            <p><strong>Profesional:</strong> Lic. Martín Coria</p> 
+                            <p><strong>Profesional:</strong> Lic. ${nombreProfesional}</p> 
                         </div>
 
                         <div class="section"><h3>Motivo de Consulta</h3><p>${informe.motivo || 'No especificado'}</p></div>
