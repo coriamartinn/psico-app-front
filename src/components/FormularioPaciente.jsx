@@ -200,19 +200,21 @@ export const FormularioPaciente = () => {
                             </div>
                         </div>
 
-                        {/* Contacto escuela */}
+                        {/* Contacto escuela 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                        </div>*/}
+
+                        {/* CONTACTO */}
+                        <div>
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-2">Contacto de la institución</label>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><GraduationCap size={18} className="text-slate-400" /></div>
-                                    <input type="text" name="school_contact" placeholder="Ej: 3° Grado" className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" value={datos.school_contact} onChange={handleChange} />
+                                    <input type="text" name="school_contact" placeholder="Ej: 1131745876" className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" value={datos.school_contact} onChange={handleChange} />
                                 </div>
                             </div>
-                        </div>
 
-                        {/* CONTACTO */}
-                        <div>
                             <label className="block text-sm font-semibold text-slate-700 mb-2">Contacto Padres</label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><Phone size={18} className="text-slate-400" /></div>
